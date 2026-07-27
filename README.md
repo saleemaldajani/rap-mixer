@@ -1,3 +1,18 @@
+---
+title: The Rap Mixer
+emoji: 🎤
+colorFrom: red
+colorTo: blue
+sdk: gradio
+sdk_version: 6.20.0
+python_version: "3.11"
+app_file: app.py
+pinned: false
+license: mit
+suggested_hardware: cpu-basic
+short_description: Context-aware rap analysis, revision, freestyle, battles
+---
+
 # The Rap Mixer
 
 The Rap Mixer is a Gradio application for inspecting how artist-controlled performance choices (A) interact with a selected cultural context (B) to produce several output scores—not one universal rating. It supports pre-recorded analysis, a bounded live four-bar stream, transparent calculation traces, and constrained revision recommendations.
@@ -70,6 +85,16 @@ The repository includes a production `Dockerfile` and `railway.json`. In Railway
 Railway supplies `PORT`; `app.py` binds that port on `0.0.0.0` inside the container. The image installs `ffmpeg` and `libsndfile1`. Its filesystem is ephemeral, so downloaded exports should be treated as temporary. The base image does not install the large optional Whisper models; manual lyrics and deterministic local analysis work without API keys. To offer local Whisper in a larger deployment, add the `whisper` optional dependencies and budget for model download time, RAM, and persistent caching.
 
 For local development, the app remains at `127.0.0.1:7860` unless the Gradio environment variables are changed.
+
+## Deploy on Hugging Face Spaces
+
+The YAML front matter at the top of this README configures a Gradio Space (CPU Basic). The Space
+installs `requirements.txt` plus the system packages in `packages.txt` (`ffmpeg`, `libsndfile1`)
+and runs `app.py`, which exposes the Blocks object as `demo`. As on Railway, do not add provider
+API keys as Space secrets: this edition ignores server-side provider keys, and visitors either use
+the free local path or hold their own key for the session. Native MRT2/MIDI probing stays disabled
+(`ENABLE_LOCAL_MRT2_PROBE` unset), and heavyweight local Whisper models are not installed on the
+free CPU tier—manual lyrics and deterministic local analysis remain the no-key path.
 
 ## Known limitations and roadmap
 
