@@ -1,0 +1,1 @@
+from rap_mixer.providers.remote import OpenAICompatibleSemanticAnalyzer as GeminiSemanticAnalyzer

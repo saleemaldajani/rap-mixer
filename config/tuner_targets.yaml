@@ -1,0 +1,15 @@
+profiles:
+  Clear and direct: {person: 62, words: 78, voice: 76, music: 58, interaction: 66, culture: 55}
+  Dense and technical: {person: 64, words: 86, voice: 72, music: 60, interaction: 58, culture: 68}
+  Melodic and spacious: {person: 62, words: 62, voice: 78, music: 84, interaction: 55, culture: 56}
+  Aggressive battle: {person: 76, words: 72, voice: 82, music: 62, interaction: 86, culture: 65}
+  Reflective album verse: {person: 82, words: 78, voice: 70, music: 72, interaction: 52, culture: 68}
+  Club performance: {person: 62, words: 62, voice: 80, music: 88, interaction: 76, culture: 58}
+  Cypher presence: {person: 76, words: 78, voice: 80, music: 68, interaction: 78, culture: 70}
+tolerances: {person: 14, words: 12, voice: 12, music: 14, interaction: 14, culture: 16}
+context_priority:
+  Battle: [interaction, voice, words, person]
+  Club: [music, voice, interaction, words]
+  Album: [person, words, voice, culture]
+  Cypher: [voice, person, interaction, words]
+  Freestyle: [voice, music, words, interaction]

@@ -1,0 +1,10 @@
+version: "1.0-prototype"
+note: "Prototype assumptions; tune with community research and validation."
+contexts:
+  Cypher: {flow: 1.25, clarity: 0.9, groove: 1.0, response: 1.2, replay: 0.8, lineage: 1.1}
+  Battle: {flow: 1.0, clarity: 1.15, groove: 0.8, response: 1.4, replay: 0.75, lineage: 1.0}
+  Album: {flow: 0.9, clarity: 1.0, groove: 1.0, response: 0.7, replay: 1.35, lineage: 1.05}
+  Club: {flow: 0.9, clarity: 1.1, groove: 1.5, response: 1.2, replay: 1.0, lineage: 0.65}
+  Platform: {flow: 0.9, clarity: 1.2, groove: 1.0, response: 1.0, replay: 1.35, lineage: 0.7}
+  Canon: {flow: 1.0, clarity: 0.9, groove: 0.9, response: 0.8, replay: 1.25, lineage: 1.5}
+  Freestyle: {flow: 1.3, clarity: 0.9, groove: 1.2, response: 1.0, replay: 0.75, lineage: 0.9}

@@ -1,0 +1,13 @@
+default_key:
+  requests_per_session: 20
+  audio_minutes_per_session: 10
+  requests_per_minute: 5
+  semantic_calls_per_session: 10
+  timeout_seconds: 45
+  retries: 1
+stream:
+  every_seconds: 1.0
+  time_limit_seconds: 600
+  ring_buffer_seconds: 120
+  overlap_seconds: 2.0
+

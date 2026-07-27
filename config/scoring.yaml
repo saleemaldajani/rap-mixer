@@ -1,0 +1,52 @@
+version: "1.0-prototype"
+note: "Coefficients are transparent prototype assumptions, not validated artistic truth."
+outputs:
+  Rap membership:
+    bias: -1.1
+    features: {words: 0.55, voice: 0.65, music: 0.3, culture: 0.5, interaction: 0.25}
+    interactions: {words_voice: 0.25, person_culture: 0.2}
+  Intelligibility:
+    bias: -1.0
+    features: {words: 0.8, voice: 0.8, music: 0.15, person: 0.2}
+    interactions: {words_voice: 0.45, voice_music: 0.25}
+  Musicality:
+    bias: -1.15
+    features: {voice: 0.8, music: 0.85, words: 0.2}
+    interactions: {voice_music: 0.55, music_context: 0.3}
+  Potency:
+    bias: -1.3
+    features: {person: 0.75, words: 0.65, voice: 0.55, interaction: 0.35}
+    interactions: {person_words: 0.45, voice_person: 0.35, interaction_context: 0.25}
+  Replay depth:
+    bias: -1.3
+    features: {words: 0.8, person: 0.4, music: 0.35, culture: 0.3}
+    interactions: {words_culture: 0.4, person_words: 0.25}
+  Cultural resonance:
+    bias: -1.45
+    features: {culture: 0.9, person: 0.45, words: 0.35, interaction: 0.25}
+    interactions: {person_culture: 0.55, words_culture: 0.4}
+  Battle effectiveness:
+    bias: -1.6
+    features: {interaction: 0.9, person: 0.6, words: 0.65, voice: 0.35}
+    interactions: {interaction_context: 0.6, person_words: 0.3}
+  Emotional impact:
+    bias: -1.4
+    features: {person: 0.9, voice: 0.65, words: 0.45, music: 0.25}
+    interactions: {voice_person: 0.55}
+  Innovation:
+    bias: -1.5
+    features: {words: 0.45, voice: 0.4, music: 0.4, culture: 0.5}
+    interactions: {words_culture: 0.3}
+  Commercial accessibility:
+    bias: -1.1
+    features: {words: 0.45, voice: 0.55, music: 0.65, interaction: 0.2}
+    interactions: {voice_music: 0.35, music_context: 0.3}
+  Artistic distinctiveness:
+    bias: -1.5
+    features: {person: 0.85, words: 0.45, voice: 0.4, culture: 0.35}
+    interactions: {person_words: 0.5, voice_person: 0.25}
+  Audience fit:
+    bias: -1.2
+    features: {interaction: 0.65, culture: 0.55, words: 0.35, music: 0.3}
+    interactions: {interaction_context: 0.55, music_context: 0.35}
+

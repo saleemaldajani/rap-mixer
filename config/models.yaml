@@ -1,0 +1,8 @@
+version: "1.0"
+whisper_model: "small.en"
+providers:
+  openai: {env_model: DEFAULT_OPENAI_MODEL, economical_default: gpt-4o-mini}
+  anthropic: {env_model: DEFAULT_ANTHROPIC_MODEL, economical_default: claude-3-5-haiku-latest}
+  gemini: {env_model: DEFAULT_GEMINI_MODEL, economical_default: gemini-2.0-flash-lite}
+  ollama: {base_url_env: OLLAMA_BASE_URL, default_model: llama3.2}
+
