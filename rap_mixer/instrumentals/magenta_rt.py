@@ -18,17 +18,21 @@ class MagentaRealtimeProvider:
     def capabilities(self) -> dict:
         midi_outputs = []
         audio_inputs = []
-        try:
-            import mido
-            import sounddevice as sd
+        probe_local = os.getenv("ENABLE_LOCAL_MRT2_PROBE", "").strip().lower() in {
+            "1", "true", "yes", "on",
+        }
+        if probe_local:
+            try:
+                import mido
+                import sounddevice as sd
 
-            midi_outputs = mido.get_output_names()
-            audio_inputs = [
-                device["name"] for device in sd.query_devices()
-                if device["max_input_channels"] > 0
-            ]
-        except (ImportError, OSError):
-            pass
+                midi_outputs = mido.get_output_names()
+                audio_inputs = [
+                    device["name"] for device in sd.query_devices()
+                    if device["max_input_channels"] > 0
+                ]
+            except (ImportError, OSError):
+                pass
         local_ready = (
             any("MRT2 - Collider Input" in name for name in midi_outputs)
             and "ZoomAudioDevice" in audio_inputs
@@ -41,7 +45,8 @@ class MagentaRealtimeProvider:
             "capture_device": "ZoomAudioDevice" if "ZoomAudioDevice" in audio_inputs else None,
             "fallback": "uploaded instrumental or metronome",
             "note": (
-                "Local MRT2 capture requires Collider/Jam Audio Output = ZoomAudioDevice at 48 kHz."
+                "Local MRT2 capture requires ENABLE_LOCAL_MRT2_PROBE=true and Collider/Jam "
+                "Audio Output = ZoomAudioDevice at 48 kHz."
             ),
         }
 
@@ -53,6 +58,13 @@ class MagentaRealtimeProvider:
             response.raise_for_status()
             audio, sample_rate = sf.read(io.BytesIO(response.content), dtype="float32")
             return sample_rate, audio
+        if os.getenv("ENABLE_LOCAL_MRT2_PROBE", "").strip().lower() not in {
+            "1", "true", "yes", "on",
+        }:
+            raise RuntimeError(
+                "Local MRT2 hardware access is disabled in this deployment. "
+                "Configure MAGENTA_REALTIME_URL or use an uploaded instrumental."
+            )
         return self._capture_local_mrt2(bpm, bars, engine)
 
     @staticmethod

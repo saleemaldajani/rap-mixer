@@ -106,6 +106,9 @@ adapter service. The service contract is `POST /continue` with `{bpm, bars}` ret
 and `POST /stop`. If it is missing, unreachable, or returns invalid audio, the interface explicitly
 reports the failure and produces a local metronome backing track. The Magenta repository and its
 hardware/runtime dependencies are intentionally not bundled into the base Rap Mixer install.
+Direct MRT2 hardware probing is disabled in this public/headless build. Local developers may opt
+in with `ENABLE_LOCAL_MRT2_PROBE=true`; Railway deployments should leave it disabled and use the
+adapter URL or uploaded instrumentals.
 
 On macOS, **Performed response** uses the system `say` command as a clearly labeled synthetic
 development voice. Battle and freestyle performances render each line into one BPM-sized bar,
