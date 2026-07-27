@@ -565,16 +565,30 @@ def hold_anthropic_key(value: str, request: gr.Request):
     return save_session_credential("Anthropic", value, request)
 
 
-def test_openai_key(source, consent, request: gr.Request) -> str:
+def _hold_on_use(provider: str, key_value: str, request: gr.Request) -> None:
+    """Store the visible key box content before using a provider.
+
+    Pasting into a Gradio textbox does not reliably emit the `input` event, so
+    the vault may lag behind what the visitor sees in the box. Whatever is in
+    the box when they act is what gets used.
+    """
+    if (key_value or "").strip():
+        store_key(request.session_hash, provider, key_value.strip())
+
+
+def test_openai_key(key_value, source, consent, request: gr.Request) -> str:
+    _hold_on_use("openai", key_value, request)
     return test_provider_connection("OpenAI", source, consent, request)
 
 
-def test_gemini_key(source, consent, request: gr.Request) -> str:
+def test_gemini_key(key_value, source, consent, request: gr.Request) -> str:
+    _hold_on_use("gemini", key_value, request)
     return test_provider_connection("Gemini", source, consent, request)
 
 
-def test_anthropic_key(source, consent, request: gr.Request) -> str:
+def test_anthropic_key(key_value, source, consent, request: gr.Request) -> str:
     try:
+        _hold_on_use("anthropic", key_value, request)
         require_cloud_consent("anthropic", consent)
         key = resolve_key(
             "anthropic", normalize_credential_source(source),
@@ -704,26 +718,27 @@ def build_app():
             save_anthropic.click(
                 hold_anthropic_key, anthropic_key, [anthropic_status, source],
             )
-            # Pasting or typing a key holds it immediately; the buttons stay as an
-            # explicit alternative. `.input` only fires on user edits, so session
-            # resets that clear these boxes do not re-hold anything.
-            openai_key.input(
-                hold_openai_key, openai_key, [openai_status, source],
-            )
-            gemini_key.input(
-                hold_gemini_key, gemini_key, [gemini_status, source],
-            )
-            anthropic_key.input(
-                hold_anthropic_key, anthropic_key, [anthropic_status, source],
-            )
+            # Typing (`input`), pasting then leaving the box (`blur`), and Enter
+            # (`submit`) all hold the visible key; paste alone does not reliably
+            # emit `input`, and blur always precedes any button click. These only
+            # fire on user actions, so session resets that clear the boxes do not
+            # re-hold anything.
+            for key_box, holder, status_box in (
+                (openai_key, hold_openai_key, openai_status),
+                (gemini_key, hold_gemini_key, gemini_status),
+                (anthropic_key, hold_anthropic_key, anthropic_status),
+            ):
+                key_box.input(holder, key_box, [status_box, source])
+                key_box.blur(holder, key_box, [status_box, source])
+                key_box.submit(holder, key_box, [status_box, source])
             test_openai_button.click(
-                test_openai_key, [source, consent], openai_status,
+                test_openai_key, [openai_key, source, consent], openai_status,
             )
             test_gemini_button.click(
-                test_gemini_key, [source, consent], gemini_status,
+                test_gemini_key, [gemini_key, source, consent], gemini_status,
             )
             test_anthropic_button.click(
-                test_anthropic_key, [source, consent], anthropic_status,
+                test_anthropic_key, [anthropic_key, source, consent], anthropic_status,
             )
             clear_openai.click(
                 clear_openai_key, None, openai_status
