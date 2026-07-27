@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, SecretStr
+
+from rap_mixer.compat import StrEnum
 
 
 class Provenance(StrEnum):

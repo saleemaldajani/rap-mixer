@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, Field
+
+from rap_mixer.compat import StrEnum
 
 
 class BattlePhase(StrEnum):
