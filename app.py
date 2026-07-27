@@ -1,8 +1,27 @@
 import os
 
+try:
+    # Present only on Hugging Face ZeroGPU Spaces (installed by the platform).
+    import spaces
+except ImportError:
+    spaces = None
+
 import gradio as gr
 
 from rap_mixer.ui.app import CSS, build_app
+
+if spaces is not None:
+
+    @spaces.GPU(duration=10)
+    def zerogpu_startup_probe() -> bool:
+        """ZeroGPU hosting requires one @spaces.GPU function at startup.
+
+        The Rap Mixer's deterministic analysis path is CPU-only, so this
+        probe is never called by the UI; the decorator is effect-free
+        outside ZeroGPU environments.
+        """
+        return True
+
 
 demo = build_app()
 
