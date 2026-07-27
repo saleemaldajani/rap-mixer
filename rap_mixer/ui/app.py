@@ -407,8 +407,22 @@ def reset_tuner_display():
     return transcript, *rendered, "Pause animation", ""
 
 
-def save_session_credential(provider: str, value: str, request: gr.Request) -> str:
-    return store_key(request.session_hash, provider.lower().split()[0], value)
+def save_session_credential(provider: str, value: str, request: gr.Request):
+    """Hold a key in the session vault and switch the credential source with it.
+
+    Returns a status message plus an update for the Credential source radio so
+    a pasted key is immediately usable without extra clicks.
+    """
+    name = provider.lower().split()[0]
+    if not (value or "").strip():
+        clear_key(request.session_hash, name)
+        return f"{provider} key box is empty — no key held.", gr.update()
+    store_key(request.session_hash, name, value.strip())
+    return (
+        f"{provider} key held in server-side session memory and selected for use. "
+        "Cloud calls also need the consent box checked.",
+        gr.update(value="Use my own API key"),
+    )
 
 
 def transcribe_once(audio, source, consent, model, request: gr.Request):
@@ -539,15 +553,15 @@ def clear_one_credential(provider: str, request: gr.Request) -> str:
     return f"{provider} credential cleared."
 
 
-def hold_openai_key(value: str, request: gr.Request) -> str:
+def hold_openai_key(value: str, request: gr.Request):
     return save_session_credential("OpenAI", value, request)
 
 
-def hold_gemini_key(value: str, request: gr.Request) -> str:
+def hold_gemini_key(value: str, request: gr.Request):
     return save_session_credential("Gemini", value, request)
 
 
-def hold_anthropic_key(value: str, request: gr.Request) -> str:
+def hold_anthropic_key(value: str, request: gr.Request):
     return save_session_credential("Anthropic", value, request)
 
 
@@ -609,7 +623,7 @@ def build_app():
         gr.Markdown("""<div class='hero'><h1>The Rap Mixer</h1><h3>What the artist makes × what the context rewards → several outcomes, not one universal score</h3><p class='disclaimer'>Scores explain a configuration in a selected context. They are not objective artistic truth.</p></div>""")
         bundle_state = gr.State(None)
         live_state = gr.State(None)
-        with gr.Accordion("Model, credentials & data sharing", open=False):
+        with gr.Accordion("API keys, models & data sharing — this one panel is used by every tab", open=True):
             with gr.Row():
                 stt = gr.Dropdown(["faster-whisper", "transformers-whisper", "OpenAI transcription API"], value="faster-whisper", label="Speech-to-text")
                 semantic = gr.Dropdown(["Deterministic local baseline", "Ollama", "OpenAI", "Anthropic Claude", "Google Gemini"], value="Deterministic local baseline", label="Semantic analysis")
@@ -620,7 +634,9 @@ def build_app():
                 )
             gr.Markdown(
                 "This public app has no shared or owner API keys. Use the free local modes, "
-                "or hold your own provider keys in session memory."
+                "or paste your own provider key below — it is held automatically in "
+                "server-side session memory and used by all tabs. Cloud calls also require "
+                "the consent box."
             )
             gr.Markdown("Cloud sharing notice: depending on the provider, audio, transcript text, or extracted features may leave this server. Local modes send nothing.")
             consent = gr.Checkbox(label="I consent to this session's described cloud data transfer")
@@ -680,13 +696,25 @@ def build_app():
                 )
             credential_status = gr.Textbox(label="Session credential status", interactive=False)
             save_openai.click(
-                hold_openai_key, openai_key, openai_status,
+                hold_openai_key, openai_key, [openai_status, source],
             )
             save_gemini.click(
-                hold_gemini_key, gemini_key, gemini_status,
+                hold_gemini_key, gemini_key, [gemini_status, source],
             )
             save_anthropic.click(
-                hold_anthropic_key, anthropic_key, anthropic_status,
+                hold_anthropic_key, anthropic_key, [anthropic_status, source],
+            )
+            # Pasting or typing a key holds it immediately; the buttons stay as an
+            # explicit alternative. `.input` only fires on user edits, so session
+            # resets that clear these boxes do not re-hold anything.
+            openai_key.input(
+                hold_openai_key, openai_key, [openai_status, source],
+            )
+            gemini_key.input(
+                hold_gemini_key, gemini_key, [gemini_status, source],
+            )
+            anthropic_key.input(
+                hold_anthropic_key, anthropic_key, [anthropic_status, source],
             )
             test_openai_button.click(
                 test_openai_key, [source, consent], openai_status,

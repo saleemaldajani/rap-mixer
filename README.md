@@ -166,10 +166,11 @@ and Magenta RealTime are documented extension points, not claimed as working int
 
 ### OpenAI transcription and battle generation
 
-OpenAI is now a working optional path. Open **Model, credentials & data sharing**, choose
-`Use my own API key`, select `OpenAI` as the key provider, paste the key, click **Hold credential
-for session**, enable session cloud consent, and click **Test OpenAI connection**. The key remains
-only in the server-side session vault. It is never placed in `gr.State` or returned to the browser.
+OpenAI is now a working optional path. In the **API keys, models & data sharing** panel at the
+top (shared by every tab), paste the key into the OpenAI box — it is held automatically in the
+server-side session vault and the credential source switches to `Use my own API key` — then
+enable session cloud consent and click **Test OpenAI**. The key remains only in the server-side
+session vault. It is never placed in `gr.State` or returned to the browser.
 
 The transcription and battle-generation model fields accept custom compatible model IDs. Defaults
 come from `DEFAULT_OPENAI_TRANSCRIPTION_MODEL` and `DEFAULT_OPENAI_MODEL`. Pre-recorded mode has an
