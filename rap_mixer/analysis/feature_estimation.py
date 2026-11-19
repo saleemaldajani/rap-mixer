@@ -6,7 +6,27 @@ from rap_mixer.analysis.lyrics import lyric_features
 from rap_mixer.audio.features import AudioFeatureExtractor
 
 LAYERS = ["person", "words", "voice", "music", "interaction", "culture"]
+FIRST_PERSON = {"i", "i'm", "i'll", "i've", "i'd"}
 EXTRACTOR = AudioFeatureExtractor()
+
+
+def named_or_numeric_count(text: str) -> int:
+    """Tokens that look like a name or a number.
+
+    Capitals that only mark the start of a line or sentence, and the pronoun "I", do not count:
+    they say nothing about a named reference.
+    """
+    count = 0
+    for line in text.splitlines():
+        starts_unit = True
+        for raw in line.split():
+            token = re.sub(r"^[^A-Za-z0-9']+|[^A-Za-z0-9']+$", "", raw)
+            if token:
+                named = token[:1].isupper() and not starts_unit and token.lower() not in FIRST_PERSON
+                if named or any(ch.isdigit() for ch in token):
+                    count += 1
+            starts_unit = raw.endswith((".", "!", "?"))
+    return count
 
 
 def estimate_features(values, text: str, audio=None, mode="Auto-estimate, then edit"):
@@ -23,7 +43,7 @@ def estimate_features(values, text: str, audio=None, mode="Auto-estimate, then e
             "room", "street", "door", "hand", "face", "night", "light", "city",
             "train", "stage", "mic", "snare", "kick", "crowd",
         } for x in lower)
-        named_or_numeric = sum(x[:1].isupper() or any(ch.isdigit() for ch in x) for x in tokens)
+        named_or_numeric = named_or_numeric_count(text)
         repeated = 1 - len(set(lower)) / max(1, len(lower))
         person_estimate = min(100, 30 + first_person * 5 + concrete * 7 + named_or_numeric * 3)
         interaction_estimate = min(100, 25 + second_person * 7 + text.count("?") * 8)

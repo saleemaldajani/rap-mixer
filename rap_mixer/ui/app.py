@@ -71,8 +71,17 @@ CSS = """
 """
 
 
+NO_CONTEXT = (
+    "Choose a context first. The context names the game this take is judged in, "
+    "and none is preselected."
+)
+
+
 def _context(names: list[str] | str, familiarity: float) -> dict[str, float]:
-    names = [names] if isinstance(names, str) else (names or ["Cypher"])
+    names = [names] if isinstance(names, str) else list(names or [])
+    if not names:
+        # No context is neutral, so the app never picks one on the performer's behalf.
+        raise ValueError(NO_CONTEXT)
     result = {k: 0.0 for k in next(iter(CONTEXTS.values()))}
     for name in names:
         for key, value in CONTEXTS[name].items():
@@ -305,7 +314,22 @@ def live_update(chunk, state, bpm, transcript, contexts, familiarity, targets,
     enrich_bars_audio(bars, state.buffer.sample_rate, data)
     state.bar_history = bars
     active = latest_four_completed(bars)
-    features, confidence, warning = _features(values, transcript or "", (state.buffer.sample_rate, data))
+    try:
+        context = _context(contexts, familiarity)
+        features, confidence, warning = _features(
+            values, transcript or "", (state.buffer.sample_rate, data)
+        )
+    except ValueError as exc:
+        # A missing context or a silent window is not an error: say so and keep the last analysis.
+        rendered = render_cached_tuner(
+            state, tuner_profile, tuner_selected, tuner_display, tuner_reduced,
+            tuner_contrast, tuner_numbers, tuner_speed, tuner_smoothing, tuner_sensitivity,
+            tuner_frozen, target_person, target_words, target_voice, target_music,
+            target_interaction, target_culture,
+        )
+        status = f"{exc} Keep performing; the last analysis is unchanged."
+        return (state, transcript, status, gr.skip(), gr.skip(), gr.skip(), gr.skip(), gr.skip(),
+                gr.skip(), gr.skip(), gr.skip(), *rendered)
     semantic_text = (transcript or state.stable_transcript or "").strip()
     if semantic_text and semantic_text != state.semantic_text:
         state.semantic_features, state.semantic_provider = _selected_semantics(
@@ -315,7 +339,6 @@ def live_update(chunk, state, bpm, transcript, contexts, familiarity, targets,
     if state.semantic_features:
         for name, estimate in state.semantic_features.items():
             features[name] = 0.5 * features[name] + 0.5 * estimate
-    context = _context(contexts, familiarity)
     bundle = SCORER.score(features, context, confidence)
     inverse = INVERSE.recommend(
         features, context, targets or ["Intelligibility"], desired,
@@ -787,7 +810,7 @@ def build_app():
                 with gr.Row():
                     bpm = gr.Number(value=90, minimum=30, maximum=300, label="BPM")
                     time_sig = gr.Dropdown(["4/4", "3/4", "6/8"], value="4/4", label="Time signature")
-                    contexts = gr.Dropdown(list(CONTEXTS), value=["Cypher"], multiselect=True, label="Blend contexts")
+                    contexts = gr.Dropdown(list(CONTEXTS), value=None, multiselect=True, label="Blend contexts", info="Required. Nothing is preselected: you name the game.")
                     familiarity = gr.Slider(0, 100, 50, label="Audience familiarity")
                 youtube_button.click(
                     analyze_youtube_ui,
@@ -857,7 +880,7 @@ def build_app():
                     )
                 with gr.Row():
                     live_bpm = gr.Number(value=90, label="BPM")
-                    live_context = gr.Dropdown(list(CONTEXTS), value=["Cypher"], multiselect=True, label="Context")
+                    live_context = gr.Dropdown(list(CONTEXTS), value=None, multiselect=True, label="Context", info="Required. Nothing is preselected: you name the game.")
                     live_familiarity = gr.Slider(0, 100, 50, label="Audience familiarity")
                 live_sliders = []
                 with gr.Row():
@@ -893,7 +916,7 @@ def build_app():
                         [*PROFILES, "Custom"], value="Clear and direct", label="Creative target profile"
                     )
                     tuner_context = gr.Dropdown(
-                        list(CONTEXTS), value=["Cypher"], multiselect=True,
+                        list(CONTEXTS), value=None, multiselect=True,
                         label="Shared live context",
                     )
                     tuner_selected = gr.Dropdown(

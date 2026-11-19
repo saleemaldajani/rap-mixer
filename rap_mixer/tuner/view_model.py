@@ -25,12 +25,12 @@ def _cue(metric: TunerMetric) -> str:
     if metric.direction == "hold":
         return "HOLD"
     cues = {
-        "person": "INCREASE SPECIFICITY",
+        "person": "STAY ON THE CLAIM" if metric.direction == "decrease" else "INCREASE SPECIFICITY",
         "words": "SIMPLIFY THE CLAIM" if metric.direction == "decrease" else "CLARIFY THE REFERENCE",
         "voice": "SLOW CADENCE" if metric.direction == "decrease" else "INCREASE ARTICULATION",
         "music": "ADD SPACE" if metric.direction == "decrease" else "STAY IN THE POCKET",
         "interaction": "MORE ENERGY" if metric.direction == "increase" else "REDUCE ENERGY",
-        "culture": "CLARIFY THE REFERENCE",
+        "culture": "DROP A REFERENCE" if metric.direction == "decrease" else "CLARIFY THE REFERENCE",
     }
     return cues.get(metric.id, "KEEP THIS SETTING")
 

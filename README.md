@@ -46,7 +46,7 @@ The base install is CPU-only and requires no API key. For local transcription, i
 
 ## Scoring and provenance
 
-For each output, the engine evaluates `100 × sigmoid(bias + Σ(context × coefficient × normalized A) + Σ interaction coefficient × interaction)`. Final arithmetic is always deterministic and local. `config/scoring.yaml` contains every coefficient; `config/contexts.yaml` contains context profiles. Both are labeled prototype assumptions and should be replaced or calibrated through community-led empirical work.
+For each output, the engine evaluates `100 × sigmoid(bias + 0.35 × (context focus − 1) + Σ(coefficient × A) + Σ(γ × z))`, where A is each facet on a 0–1 scale, the context focus is a weighted mean of two context weights, and z is an interaction term. Final arithmetic is always deterministic and local. `config/scoring.yaml` contains every coefficient; `config/contexts.yaml` contains context profiles. Both are labeled prototype assumptions and should be replaced or calibrated through community-led empirical work.
 
 Direct audio features include duration, energy, dynamic range, clipping, noise contrast, and onset proxy. Transcript-derived features include syllables, lexical novelty, rhyme-ending proxies, repetition, and clarity proxies. Semantic roles and cultural values are local heuristic inferences, never direct measurements. Manually moved A controls are user-supplied. Missing audio/transcript evidence increases uncertainty.
 

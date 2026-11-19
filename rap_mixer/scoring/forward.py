@@ -10,6 +10,10 @@ from rap_mixer.analysis.schemas import OutputScore, ScoreBundle, ScoreContributi
 
 ROOT = Path(__file__).resolve().parents[2]
 
+# Shown in every trace. It must describe the arithmetic in score(): the context profile enters as an
+# additive shift of the logit, not as a multiplier on the facet coefficients.
+TRACE_FORMULA = "100 × sigmoid(bias + 0.35 × (context focus − 1) + Σ(coefficient × A) + Σ(γ × z))"
+
 CONTEXT_FOCUS = {
     "Rap membership": {"flow": 0.5, "lineage": 0.5},
     "Intelligibility": {"clarity": 0.8, "familiarity": 0.2},
@@ -59,7 +63,7 @@ class DeterministicScoringEngine:
                 positive=sorted([x for x in terms if x.amount >= 0], key=lambda x: -x.amount)[:4],
                 negative=sorted([x for x in terms if x.amount < 0], key=lambda x: x.amount)[:4],
                 missing_evidence=missing,
-                trace={"formula": "100 × sigmoid(bias + Σ(context × coefficient × q(A)) + Σγz)",
+                trace={"formula": TRACE_FORMULA,
                        "bias": spec["bias"], "normalized_A": {k: round(v / 100, 3) for k, v in features.items()},
                        "active_context_focus": focus, "context_factor": round(context_factor, 3),
                        "raw": round(raw, 4), "uncertainty_method": "heuristic evidence confidence"},
